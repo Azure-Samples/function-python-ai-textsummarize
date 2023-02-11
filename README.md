@@ -37,7 +37,7 @@ Search for Environment Variables in Settings, create new System Variables simila
 | AI_URL | *Paste from step 4* |
 | AI_SECRET | *Paste from step 4* |
 6) [Azure Storage Explorer](https://azure.microsoft.com/en-us/products/storage/storage-explorer/) or storage explorer features of [Azure Portal](https://portal.azure.com)
-7) Add this local.settings.json file to the text_summarize folder to simplify local development
+7) Add this local.settings.json file to the text_summarize folder to simplify local development. Optionally fill in the AI_URL and AI_SECRET values per step 4. This file will be gitignored to protect secrets from committing to your repo.
 ```json
 {
   "IsEncrypted": false,
@@ -51,6 +51,18 @@ Search for Environment Variables in Settings, create new System Variables simila
   }
 }
 ```
+
+### Using VS Code
+1) Open the root folder in VS Code:
+
+```bash
+code .
+```
+2) Run and Debug by pressing `F5`
+2) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `test-samples-trigger` if it does not already exists
+3) Copy any .txt document file with text into the `test-samples-trigger` container
+
+You will see AI analysis happen in the Terminal standard out.  The analysis will be saved in a .txt file in the `test-samples-output` blob container.
 
 ### Using Functions CLI
 1) Open a new terminal and do the following:
