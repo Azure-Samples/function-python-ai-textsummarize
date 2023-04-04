@@ -81,8 +81,7 @@ You will see AI analysis happen in the Terminal standard out.  The analysis will
 
 The easiest way to deploy this app is using the [Azure Dev CLI aka AZD](https://aka.ms/azd).  If you open this repo in GitHub CodeSpaces the AZD tooling is already preinstalled.
 
-1. Open a terminal, create a new empty folder, and change into it.
-2. Run the following command to initialize the project. 
+1. Run the following command to initialize the project. 
 
 ```bash
 azd init --template https://github.com/Azure-Samples/function-python-ai-textsummarize
@@ -92,7 +91,7 @@ This command will clone the code to your current folder and prompt you for the f
 
 - `Environment Name`: This will be used as a prefix for the resource group that will be created to hold all Azure resources. This name should be unique within your Azure subscription.
 
-3. Run the following command to build a deployable copy of your application, provision the template's infrastructure to Azure and also deploy the applciation code to those newly provisioned resources.
+2. Run the following command to build a deployable copy of your application, provision the template's infrastructure to Azure and also deploy the applciation code to those newly provisioned resources.
 
 ```bash
 azd up
