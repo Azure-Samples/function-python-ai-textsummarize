@@ -53,14 +53,16 @@ Search for Environment Variables in Settings, create new System Variables simila
 ```
 
 ### Using VS Code
-1) Open the root folder in VS Code:
+1) Open the `./text_summarize` folder in VS Code:
 
 ```bash
+cd ./text_summarize
 code .
 ```
-2) Run and Debug by pressing `F5`
-2) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `test-samples-trigger` if it does not already exists
-3) Copy any .txt document file with text into the `test-samples-trigger` container
+2) When prompted in VS Code, `Create Virtual Environment` and choose your version of Python if prompted.
+3) Run and Debug by pressing `F5`
+4) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `test-samples-trigger` if it does not already exists
+5) Copy any .txt document file with text into the `test-samples-trigger` container
 
 You will see AI analysis happen in the Terminal standard out.  The analysis will be saved in a .txt file in the `test-samples-output` blob container.
 
