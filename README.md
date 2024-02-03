@@ -7,7 +7,7 @@ languages:
 products:
 - azure
 - azure-functions
-- azure-ai-service
+- ai-services
 - azure-cognitive-search
 urlFragment: function-python-ai-textsummarize
 name: Azure Functions - Text Summarization using AI Cognitive Language Service (Python v2 Function)
