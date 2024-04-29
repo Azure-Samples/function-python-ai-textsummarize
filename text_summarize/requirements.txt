@@ -3,4 +3,4 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 azure-functions
-azure-ai-textanalytics==5.2.0b4
+azure-ai-textanalytics

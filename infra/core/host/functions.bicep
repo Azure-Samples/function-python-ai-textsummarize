@@ -1,3 +1,4 @@
+metadata description = 'Creates an Azure Function in an existing Azure App Service plan.'
 param name string
 param location string = resourceGroup().location
 param tags object = {}
@@ -8,7 +9,6 @@ param appServicePlanId string
 param keyVaultName string = ''
 param managedIdentity bool = !empty(keyVaultName)
 param storageAccountName string
-param aiResourceName string
 
 // Runtime Properties
 @allowed([
@@ -31,6 +31,7 @@ param kind string = 'functionapp,linux'
 param allowedOrigins array = []
 param alwaysOn bool = true
 param appCommandLine string = ''
+@secure()
 param appSettings object = {}
 param clientAffinityEnabled bool = false
 param enableOryxBuild bool = contains(kind, 'linux')
@@ -40,6 +41,7 @@ param minimumElasticInstanceCount int = -1
 param numberOfWorkers int = -1
 param scmDoBuildDuringDeployment bool = true
 param use32BitWorkerProcess bool = false
+param healthCheckPath string = ''
 
 module functions 'appservice.bicep' = {
   name: '${name}-functions'
@@ -54,15 +56,13 @@ module functions 'appservice.bicep' = {
     appServicePlanId: appServicePlanId
     appSettings: union(appSettings, {
         AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
-        blobstorage: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
-        AI_SECRET: cognitiveService.listKeys().key1
-        AI_URL: cognitiveService.properties.endpoint
         FUNCTIONS_EXTENSION_VERSION: extensionVersion
         FUNCTIONS_WORKER_RUNTIME: runtimeName
       })
     clientAffinityEnabled: clientAffinityEnabled
     enableOryxBuild: enableOryxBuild
     functionAppScaleLimit: functionAppScaleLimit
+    healthCheckPath: healthCheckPath
     keyVaultName: keyVaultName
     kind: kind
     linuxFxVersion: linuxFxVersion
@@ -79,10 +79,6 @@ module functions 'appservice.bicep' = {
 
 resource storage 'Microsoft.Storage/storageAccounts@2021-09-01' existing = {
   name: storageAccountName
-}
-
-resource cognitiveService 'Microsoft.CognitiveServices/accounts@2021-10-01' existing =  {
-  name: aiResourceName
 }
 
 output identityPrincipalId string = managedIdentity ? functions.outputs.identityPrincipalId : ''

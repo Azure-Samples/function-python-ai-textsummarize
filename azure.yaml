@@ -2,7 +2,7 @@
 
 name: text-summzarize-python-ai-func
 metadata:
-  template: text-summzarize-python-ai-func@0.0.1-beta
+  template: text-summzarize-python-ai-func@0.0.2
 services:
   api:
     project: ./text_summarize/
