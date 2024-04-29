@@ -5,7 +5,7 @@ param sku string = 'S'
 
 param principalIds array = []
 
-resource cognitiveService 'Microsoft.CognitiveServices/accounts@2021-10-01' = {
+resource cognitiveService 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: aiResourceName
   sku: {
     name: sku

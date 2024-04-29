@@ -22,6 +22,7 @@ param logAnalyticsName string = ''
 param resourceGroupName string = ''
 param storageAccountName string = ''
 param aiResourceName string = ''
+param aiResourceGroupName string = ''
 
 @description('Id of the user or app to assign application roles')
 param principalId string = ''
@@ -37,9 +38,13 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
+resource aiResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (!empty(aiResourceGroupName)) {
+  name: !empty(aiResourceGroupName) ? aiResourceGroupName : rg.name
+}
+
 module ai 'app/ai.bicep' = {
   name: 'ai'
-  scope: rg
+  scope: aiResourceGroup
   params: {
     name: !empty(aiResourceName) ? aiResourceName : '${abbrs.cognitiveServicesTextAnalytics}-${resourceToken}'
     location: location
@@ -61,9 +66,6 @@ module api './app/api.bicep' = {
     storageAccountName: storage.outputs.name
     aiResourceName: !empty(aiResourceName) ? aiResourceName : '${abbrs.cognitiveServicesTextAnalytics}-${resourceToken}'
     appSettings: {
-      //AI_SECRET: cognitiveService.listKeys().key1
-      //AI_URL: ai.outputs.url
-      AzureWebJobsFeatureFlags: 'EnableWorkerIndexing'
     }
   }
 }

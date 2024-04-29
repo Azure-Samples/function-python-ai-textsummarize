@@ -20,7 +20,13 @@ module api '../core/host/functions.bicep' = {
     tags: union(tags, { 'azd-service-name': serviceName })
     allowedOrigins: allowedOrigins
     alwaysOn: false
-    appSettings: appSettings
+    appSettings: union(appSettings, {
+      AzureWebJobsFeatureFlags: 'EnableWorkerIndexing'
+      AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+      blobstorage: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+      AI_SECRET: cognitiveService.listKeys().key1
+      AI_URL: cognitiveService.properties.endpoint
+    })
     applicationInsightsName: applicationInsightsName
     appServicePlanId: appServicePlanId
     keyVaultName: keyVaultName
@@ -29,11 +35,18 @@ module api '../core/host/functions.bicep' = {
     minimumElasticInstanceCount: 0
     //--py
     runtimeName: 'python'
-    runtimeVersion: '3.9'
+    runtimeVersion: '3.11'
     storageAccountName: storageAccountName
-    aiResourceName: aiResourceName
     scmDoBuildDuringDeployment: false
   }
+}
+
+resource storage 'Microsoft.Storage/storageAccounts@2021-09-01' existing = {
+  name: storageAccountName
+}
+
+resource cognitiveService 'Microsoft.CognitiveServices/accounts@2021-10-01' existing =  {
+  name: aiResourceName
 }
 
 output SERVICE_API_IDENTITY_PRINCIPAL_ID string = api.outputs.identityPrincipalId

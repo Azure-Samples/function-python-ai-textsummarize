@@ -2,7 +2,7 @@ param name string
 param location string = resourceGroup().location
 param tags object = {}
 
-module aiLanguageService '../core/cognitive/ai-textanalytics.bicep' = {
+module aiLanguageService '../core/ai/ai-textanalytics.bicep' = {
   name: 'ai-textanalytics'
   params: {
     aiResourceName: name
