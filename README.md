@@ -25,7 +25,7 @@ This sample shows how to take text documents as a input via BlobTrigger, does Te
 ## Run on your local environment
 
 ### Pre-reqs
-1) [Python 3.7 - 3.10](https://www.python.org/) required 
+1) [Python 3.78 - 3.11](https://www.python.org/) required 
 2) [Azure Functions Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Cmacos%2Ccsharp%2Cportal%2Cbash#install-the-azure-functions-core-tools)
 3) [Azurite](https://github.com/Azure/Azurite)
 
@@ -98,7 +98,7 @@ You will see AI analysis happen in the Terminal standard out.  The analysis will
 
 ## Deploy to Azure
 
-The easiest way to deploy this app is using the [Azure Dev CLI aka AZD](https://aka.ms/azd).  If you open this repo in GitHub CodeSpaces the AZD tooling is already preinstalled.
+The easiest way to deploy this app is using the [Azure Developer CLI](https://aka.ms/azd).  If you open this repo in GitHub CodeSpaces the AZD tooling is already preinstalled.
 
 To provision and deploy:
 ```bash
