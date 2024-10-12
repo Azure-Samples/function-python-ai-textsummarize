@@ -1,44 +1,36 @@
 {
-    "name": "Azure Developer CLI",
-    "build": {
-        "dockerfile": "Dockerfile",
-        "args": {
-            "VARIANT": "bullseye"
-        }
-    },
+    "name": "Functions Quickstarts Codespace",
+    "dockerFile": "Dockerfile",
     "features": {
-        "ghcr.io/devcontainers/features/azure-cli:1": {
-            "version": "2.38"
-        },
-        "ghcr.io/devcontainers/features/docker-from-docker:1": {
-            "version": "20.10"
-        },
-        "ghcr.io/devcontainers/features/dotnet:1": {
-            "version": "6.0"
-        },
-        "ghcr.io/devcontainers/features/github-cli:1": {
-            "version": "2"
-        },
-        "ghcr.io/devcontainers/features/node:1": {
-            "version": "16",
-            "nodeGypDependencies": false
-        }
+      "azure-cli": "latest"
     },
-    "extensions": [
-        "ms-azuretools.azure-dev",
-        "ms-azuretools.vscode-bicep",
-        "ms-azuretools.vscode-docker",
-        "ms-vscode.vscode-node-azure-pack",
-        "ms-dotnettools.csharp",
-        "ms-dotnettools.vscode-dotnet-runtime"
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "ms-azuretools.vscode-bicep",
+          "ms-azuretools.vscode-docker",
+          "ms-azuretools.vscode-azurefunctions",
+          "GitHub.copilot",
+          "humao.rest-client"
+        ]
+      }
+    },
+    "mounts": [
+      // Mount docker-in-docker library volume
+      "source=codespaces-linux-var-lib-docker,target=/var/lib/docker,type=volume"
     ],
-    "forwardPorts": [
-        3000,
-        3100
-    ],
-    "postCreateCommand": "",
-    "remoteUser": "vscode",
-    "hostRequirements": {
-        "memory": "8gb"
-    }
-}
+    // Always run image-defined docker-init.sh to enable docker-in-docker
+    "overrideCommand": false,
+    "remoteUser": "codespace",
+    "runArgs": [
+      // Enable ptrace-based debugging for Go in container
+      "--cap-add=SYS_PTRACE",
+      "--security-opt",
+      "seccomp=unconfined",
+  
+      // Enable docker-in-docker configuration
+      "--init",
+      "--privileged"
+    ]
+  }
+  
