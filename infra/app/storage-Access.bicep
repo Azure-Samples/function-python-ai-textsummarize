@@ -3,12 +3,12 @@ param principalType string = 'ServicePrincipal' // Workaround for https://learn.
 param roleDefinitionID string
 param storageAccountName string
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2021-09-01' existing = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' existing = {
   name: storageAccountName
 }
 
 // Allow access from API to storage account using a managed identity and least priv Storage roles
-resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(storageAccount.id, principalID, roleDefinitionID)
   scope: storageAccount
   properties: {

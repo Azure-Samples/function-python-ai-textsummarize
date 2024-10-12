@@ -7,8 +7,8 @@ resource cognitiveService 'Microsoft.CognitiveServices/accounts@2023-05-01' exis
   name: aiResourceName
 }
 
-// Allow access from API to storage account using a managed identity and least priv Storage roles
-resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+// Allow access from API to this resource using a managed identity and least priv role grants
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(cognitiveService.id, principalID, roleDefinitionID)
   scope: cognitiveService
   properties: {
@@ -18,4 +18,4 @@ resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-
   }
 }
 
-output ROLE_ASSIGNMENT_NAME string = storageRoleAssignment.name
+output ROLE_ASSIGNMENT_NAME string = roleAssignment.name
