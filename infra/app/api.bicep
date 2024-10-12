@@ -1,54 +1,49 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
-
-param allowedOrigins array = []
 param applicationInsightsName string = ''
 param appServicePlanId string
 param appSettings object = {}
-param keyVaultName string
+param runtimeName string 
+param runtimeVersion string 
 param serviceName string = 'api'
 param storageAccountName string
-param aiResourceName string
+param deploymentStorageContainerName string
+param virtualNetworkSubnetId string = ''
+param instanceMemoryMB int = 2048
+param maximumInstanceCount int = 100
+param identityId string = ''
+param identityClientId string = ''
+param aiLanguageServiceUrl string = ''
 
+var applicationInsightsIdentity = 'ClientId=${identityClientId};Authorization=AAD'
 
-module api '../core/host/functions.bicep' = {
-  name: '${serviceName}-functions-python-module'
+module api '../core/host/functions-flexconsumption.bicep' = {
+  name: '${serviceName}-functions-module'
   params: {
     name: name
     location: location
     tags: union(tags, { 'azd-service-name': serviceName })
-    allowedOrigins: allowedOrigins
-    alwaysOn: false
-    appSettings: union(appSettings, {
-      AzureWebJobsFeatureFlags: 'EnableWorkerIndexing'
-      AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
-      blobstorage: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
-      AI_SECRET: cognitiveService.listKeys().key1
-      AI_URL: cognitiveService.properties.endpoint
-    })
+    identityType: 'UserAssigned'
+    identityId: identityId
+    appSettings: union(appSettings,
+      {
+        AzureWebJobsStorage__clientId : identityClientId
+        APPLICATIONINSIGHTS_AUTHENTICATION_STRING: applicationInsightsIdentity
+        TEXT_ANALYTICS_ENDPOINT: aiLanguageServiceUrl
+        AZURE_CLIENT_ID: identityClientId
+      })
     applicationInsightsName: applicationInsightsName
     appServicePlanId: appServicePlanId
-    keyVaultName: keyVaultName
-    //py
-    numberOfWorkers: 1
-    minimumElasticInstanceCount: 0
-    //--py
-    runtimeName: 'python'
-    runtimeVersion: '3.11'
+    runtimeName: runtimeName
+    runtimeVersion: runtimeVersion
     storageAccountName: storageAccountName
-    scmDoBuildDuringDeployment: false
+    deploymentStorageContainerName: deploymentStorageContainerName
+    virtualNetworkSubnetId: virtualNetworkSubnetId
+    instanceMemoryMB: instanceMemoryMB 
+    maximumInstanceCount: maximumInstanceCount
   }
 }
 
-resource storage 'Microsoft.Storage/storageAccounts@2021-09-01' existing = {
-  name: storageAccountName
-}
-
-resource cognitiveService 'Microsoft.CognitiveServices/accounts@2021-10-01' existing =  {
-  name: aiResourceName
-}
-
-output SERVICE_API_IDENTITY_PRINCIPAL_ID string = api.outputs.identityPrincipalId
 output SERVICE_API_NAME string = api.outputs.name
-output SERVICE_API_URI string = api.outputs.uri
+output SERVICE_API_IDENTITY_PRINCIPAL_ID string = api.outputs.identityPrincipalId
