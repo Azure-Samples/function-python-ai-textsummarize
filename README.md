@@ -104,12 +104,12 @@ azd up
 
 ## Understand the Code
 
-The main operation of the code starts with the `summarize_function` function in [function_app.py](./text_summarize/function_app.py).  The function is triggered by a Blob uploaded event using BlobTrigger, your code runs to do the processing with AI, and then the output is returned as another blob file simply by returning a value and using the BlobOutput binding.  
+The main operation of the code starts with the `summarize_function` function in [function_app.py](./text_summarize/function_app.py).  The function is triggered by a Blob uploaded event using BlobTrigger with EventGrid, your code runs to do the processing with AI, and then the output is returned as another blob file simply by returning a value and using the BlobOutput binding.  
 
 ```python
 @app.function_name(name="summarize_function")
 @app.blob_trigger(arg_name="myblob", path="unprocessed-text/{name}",
-                  connection="AzureWebJobsStorage")
+                  connection="AzureWebJobsStorage", source="EventGrid")
 @app.blob_output(arg_name="outputblob", path="processed-text/{name}-output.txt", connection="AzureWebJobsStorage")
 def test_function(myblob: func.InputStream, outputblob: func.Out[str]):
    logging.info(f"Triggered item: {myblob.name}\n")
@@ -118,7 +118,6 @@ def test_function(myblob: func.InputStream, outputblob: func.Out[str]):
    summarized_text = ai_summarize_txt(document)
    logging.info(f"\n *****Summary***** \n{summarized_text}");
    outputblob.set(summarized_text)
-}
 ```
 
 The `ai_summarize_txt` helper function does the heavy lifting for summary extraction and sentiment analysis using the `TextAnalyticsClient` SDK from the [AI Language Services](https://learn.microsoft.com/en-us/azure/ai-services/language-service/):

@@ -1,4 +1,3 @@
-metadata description = 'Creates an Azure App Service plan.'
 param name string
 param location string = resourceGroup().location
 param tags object = {}
@@ -7,7 +6,7 @@ param kind string = ''
 param reserved bool = true
 param sku object
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
+resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: name
   location: location
   tags: tags
@@ -19,4 +18,3 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
 }
 
 output id string = appServicePlan.id
-output name string = appServicePlan.name

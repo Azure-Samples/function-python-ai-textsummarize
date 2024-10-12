@@ -8,6 +8,9 @@
     "location": {
       "value": "${AZURE_LOCATION}"
     },
+    "skipVnet": {
+      "value": "${SKIP_VNET}"
+    },
     "principalId": {
       "value": "${AZURE_PRINCIPAL_ID}"
     }

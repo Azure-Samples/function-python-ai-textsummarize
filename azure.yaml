@@ -2,7 +2,19 @@
 
 name: text-summzarize-python-ai-func
 metadata:
-  template: text-summzarize-python-ai-func@0.0.2
+  template: text-summzarize-python-ai-func@1.0.0
+hooks:
+  postdeploy:
+    windows:
+      shell: pwsh
+      run: ./scripts/post-up.ps1
+      interactive: true
+      continueOnError: false
+    posix:
+      shell: sh
+      run: ./scripts/post-up.sh
+      interactive: true
+      continueOnError: false
 services:
   api:
     project: ./text_summarize/
