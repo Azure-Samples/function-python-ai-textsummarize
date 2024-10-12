@@ -25,7 +25,7 @@ This sample shows how to take text documents as a input via BlobTrigger, does Te
 ## Run on your local environment
 
 ### Pre-reqs
-1) [Python 3.78 - 3.11](https://www.python.org/) required 
+1) [Python 3.78 - 3.12](https://www.python.org/) required 
 2) [Azure Functions Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Cmacos%2Ccsharp%2Cportal%2Cbash#install-the-azure-functions-core-tools)
 3) [Azurite](https://github.com/Azure/Azurite)
 
@@ -34,61 +34,57 @@ The easiest way to install Azurite is using a Docker container or the support bu
 docker run -d -p 10000:10000 -p 10001:10001 -p 10002:10002 mcr.microsoft.com/azure-storage/azurite
 ```
 
-4) Once you have your Azure subscription, [create a Language resource](https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics) in the Azure portal to get your key and endpoint. After it deploys, click Go to resource.
-You will need the key and endpoint from the resource you create to connect your application to the API. You'll need to store the key and endpoint into the Env Vars or User Secrets code in a next step the quickstart.
-You can use the free pricing tier (Free F0) to try the service, and upgrade later to a paid tier for production.
-5) Export these secrets as Env Vars using values from Step 4.
+4) Once you have your Azure subscription, run the following in a new terminal window to create all the AI Language and other resources needed:
+```azd provision```
 
-Mac/Linux
+Take note of the value of `TEXT_ANALYTICS_ENDPOINT` which can be found in `./.azure/<env name from azd provision>/.env`.  It will look something like:
 ```bash
-export AI_URL=*Paste from step 4*
-export AI_SECRET=*Paste from step 4*
+TEXT_ANALYTICS_ENDPOINT="https://<unique string>.cognitiveservices.azure.com/"
 ```
 
-Windows
+Alternatively you can [create a Language resource](https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics) in the Azure portal to get your key and endpoint. After it deploys, click Go to resource and view the Endpoint value.
 
-Search for Environment Variables in Settings, create new System Variables similarly to [these instructions](https://docs.oracle.com/en/database/oracle/machine-learning/oml4r/1.5.1/oread/creating-and-modifying-environment-variables-on-windows.html#GUID-DD6F9982-60D5-48F6-8270-A27EC53807D0):
-
-| Variable | Value |
-| -------- | ----- |
-| AI_URL | *Paste from step 4* |
-| AI_SECRET | *Paste from step 4* |
-6) [Azure Storage Explorer](https://azure.microsoft.com/en-us/products/storage/storage-explorer/) or storage explorer features of [Azure Portal](https://portal.azure.com)
-7) Add this local.settings.json file to the text_summarize folder to simplify local development. Optionally fill in the AI_URL and AI_SECRET values per step 4. This file will be gitignored to protect secrets from committing to your repo.
+5) [Azure Storage Explorer](https://azure.microsoft.com/en-us/products/storage/storage-explorer/) or storage explorer features of [Azure Portal](https://portal.azure.com)
+6) Add this `local.settings.json` file to the `./text_summarization` folder to simplify local development.  Optionally fill in the AI_URL and AI_SECRET values per step 4.  This file will be gitignored to protect secrets from committing to your repo.  
 ```json
 {
-  "IsEncrypted": false,
-  "Values": {
-    "FUNCTIONS_WORKER_RUNTIME": "python",
-    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
-    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "blobstorage": "UseDevelopmentStorage=true",
-    "AI_URL": "",
-    "AI_SECRET": ""
-  }
+    "IsEncrypted": false,
+    "Values": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "python",
+        "TEXT_ANALYTICS_ENDPOINT": "<insert from step 4>"
+    }
 }
 ```
 
+
+### Using Visual Studio
+1) Open `text_summarization.sln` using Visual Studio 2022 or later.
+2) Press Run (`F5`) to run in the debugger
+3) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `unprocessed-text` if it does not already exists
+4) Copy any .txt document file with text into the `unprocessed-text` container
+
+You will see AI analysis happen in the Terminal standard out.  The analysis will be saved in a .txt file in the `processed-text` blob container.
+
 ### Using VS Code
-1) Open the `./text_summarize` folder in VS Code:
+1) Open the root folder in VS Code:
 
 ```bash
-cd ./text_summarize
 code .
 ```
-2) When prompted in VS Code, `Create Virtual Environment` and choose your version of Python if prompted.
+2) Ensure `local.settings.json` exists already using steps above
 3) Run and Debug by pressing `F5`
-4) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `test-samples-trigger` if it does not already exists
-5) Copy any .txt document file with text into the `test-samples-trigger` container
+4) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `unprocessed-text` if it does not already exists
+5) Copy any .txt document file with text into the `unprocessed-text` container
 
-You will see AI analysis happen in the Terminal standard out.  The analysis will be saved in a .txt file in the `test-samples-output` blob container.
+You will see AI analysis happen in the Terminal standard out.  The analysis will be saved in a .txt file in the `processed-text` blob container.
 
-### Using Functions CLI
+### Using Functions Core Tools CLI
+0) Ensure `local.settings.json` exists already using steps above
 1) Open a new terminal and do the following:
 
 ```bash
-cd text_summarize
-pip3 install -r requirements.txt
+cd text_summarization
 func start
 ```
 2) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `test-samples-trigger` if it does not already exists
@@ -101,6 +97,60 @@ You will see AI analysis happen in the Terminal standard out.  The analysis will
 The easiest way to deploy this app is using the [Azure Developer CLI](https://aka.ms/azd).  If you open this repo in GitHub CodeSpaces the AZD tooling is already preinstalled.
 
 To provision and deploy:
+1) Open a new terminal and do the following from root folder:
 ```bash
 azd up
+```
+
+## Understand the Code
+
+The main operation of the code starts with the `summarize_function` function in [function_app.py](./text_summarize/function_app.py).  The function is triggered by a Blob uploaded event using BlobTrigger, your code runs to do the processing with AI, and then the output is returned as another blob file simply by returning a value and using the BlobOutput binding.  
+
+```python
+@app.function_name(name="summarize_function")
+@app.blob_trigger(arg_name="myblob", path="unprocessed-text/{name}",
+                  connection="AzureWebJobsStorage")
+@app.blob_output(arg_name="outputblob", path="processed-text/{name}-output.txt", connection="AzureWebJobsStorage")
+def test_function(myblob: func.InputStream, outputblob: func.Out[str]):
+   logging.info(f"Triggered item: {myblob.name}\n")
+
+   document = [myblob.read().decode('utf-8')]
+   summarized_text = ai_summarize_txt(document)
+   logging.info(f"\n *****Summary***** \n{summarized_text}");
+   outputblob.set(summarized_text)
+}
+```
+
+The `ai_summarize_txt` helper function does the heavy lifting for summary extraction and sentiment analysis using the `TextAnalyticsClient` SDK from the [AI Language Services](https://learn.microsoft.com/en-us/azure/ai-services/language-service/):
+
+```python
+def ai_summarize_txt(document):
+
+    poller = text_analytics_client.begin_extract_summary(document)
+    extract_summary_results = poller.result()
+
+    summarized_text = ""
+    document_results = poller.result()
+    for result in extract_summary_results:
+        if result.kind == "ExtractiveSummarization":
+            summarized_text= "Summary extracted: \n{}".format(
+                " ".join([sentence.text for sentence in result.sentences]))
+            print(summarized_text)
+            logging.info(f"Returning summarized text:  \n{summarized_text}")
+        elif result.is_error is True:
+            print("...Is an error with code '{}' and message '{}'".format(
+                result.error.code, result.error.message
+            ))
+            logging.error(f"Error with code '{result.error.code}' and message '{result.error.message}'")
+
+    # Perform sentiment analysis on document summary
+    sentiment_result = text_analytics_client.analyze_sentiment([summarized_text])[0]
+    print(f"\nSentiment: {sentiment_result.sentiment}")
+    print(f"Positive Score: {sentiment_result.confidence_scores.positive}")
+    print(f"Negative Score: {sentiment_result.confidence_scores.negative}")
+    print(f"Neutral Score: {sentiment_result.confidence_scores.neutral}")
+
+    summary_with_sentiment = summarized_text + f"\nSentiment: {sentiment_result.sentiment}\n"
+
+    return summary_with_sentiment
 ```
