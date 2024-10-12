@@ -3,7 +3,7 @@ param principalType string = 'ServicePrincipal' // Workaround for https://learn.
 param roleDefinitionID string
 param aiResourceName string
 
-resource cognitiveService 'Microsoft.CognitiveServices/accounts@2021-10-01' existing = {
+resource cognitiveService 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   name: aiResourceName
 }
 
