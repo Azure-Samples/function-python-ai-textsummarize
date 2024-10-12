@@ -20,8 +20,8 @@ text_analytics_client = TextAnalyticsClient(
 
 @app.function_name(name="summarize_function")
 @app.blob_trigger(arg_name="myblob", path="unprocessed-text/{name}",
-                  connection="blobstorage")
-@app.blob_output(arg_name="outputblob", path="processed-text/{name}-output.txt", connection="blobstorage")
+                  connection="AzureWebJobsStorage")
+@app.blob_output(arg_name="outputblob", path="processed-text/{name}-output.txt", connection="AzureWebJobsStorage")
 def test_function(myblob: func.InputStream, outputblob: func.Out[str]):
    logging.info(f"Triggered item: {myblob.name}\n")
 
