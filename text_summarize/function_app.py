@@ -49,3 +49,14 @@ def ai_summarize_txt(document):
                 result.error.code, result.error.message
             ))
             logging.error(f"Error with code '{result.error.code}' and message '{result.error.message}'")
+
+    # Perform sentiment analysis on document summary
+    sentiment_result = text_analytics_client.analyze_sentiment([summarized_text])[0]
+    print(f"\nSentiment: {sentiment_result.sentiment}")
+    print(f"Positive Score: {sentiment_result.confidence_scores.positive}")
+    print(f"Negative Score: {sentiment_result.confidence_scores.negative}")
+    print(f"Neutral Score: {sentiment_result.confidence_scores.neutral}")
+
+    summary_with_sentiment = summarized_text + f"\nSentiment: {sentiment_result.sentiment}\n"
+
+    return summary_with_sentiment
