@@ -11,21 +11,21 @@ products:
 - azure-cognitive-search
 urlFragment: function-python-ai-textsummarize
 name: Azure Functions - Text Summarization using AI Cognitive Language Service (Python v2 Function)
-description: Take text documents as a input via BlobTrigger with Python, does Text Summarization processing using the AI Congnitive Language service, and then outputs to another text document using BlobOutput binding.
+description: This sample shows how to take text documents as a input via BlobTrigger, does Text Summarization & Sentiment Score processing using the AI Congnitive Language service, and then outputs to another text document using BlobOutput binding. Deploys to Flex Consumption hosting plan of Azure Functions.  
 ---
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
 
 # Azure Functions
 ## Text Summarization using AI Cognitive Language Service (Python v2 Function)
 
-This sample shows how to take text documents as a input via BlobTrigger, does Text Summarization processing using the AI Congnitive Language service, and then outputs to another text document using BlobOutput binding.  
+This sample shows how to take text documents as a input via BlobTrigger, does Text Summarization & Sentiment Score processing using the AI Congnitive Language service, and then outputs to another text document using BlobOutput binding. Deploys to Flex Consumption hosting plan of Azure Functions.  
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=575770869)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Azure-Samples/function-python-ai-textsummarize)
 
 ## Run on your local environment
 
 ### Pre-reqs
-1) [Python 3.78 - 3.12](https://www.python.org/) required 
+1) [Python 3.8+](https://www.python.org/) required 
 2) [Azure Functions Core Tools](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Cmacos%2Ccsharp%2Cportal%2Cbash#install-the-azure-functions-core-tools)
 3) [Azurite](https://github.com/Azure/Azurite)
 
@@ -35,7 +35,9 @@ docker run -d -p 10000:10000 -p 10001:10001 -p 10002:10002 mcr.microsoft.com/azu
 ```
 
 4) Once you have your Azure subscription, run the following in a new terminal window to create all the AI Language and other resources needed:
-```azd provision```
+```bash
+azd provision
+```
 
 Take note of the value of `TEXT_ANALYTICS_ENDPOINT` which can be found in `./.azure/<env name from azd provision>/.env`.  It will look something like:
 ```bash
