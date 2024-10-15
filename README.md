@@ -59,15 +59,6 @@ Alternatively you can [create a Language resource](https://portal.azure.com/#cre
 }
 ```
 
-
-### Using Visual Studio
-1) Open `text_summarization.sln` using Visual Studio 2022 or later.
-2) Press Run (`F5`) to run in the debugger
-3) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `unprocessed-text` if it does not already exists
-4) Copy any .txt document file with text into the `unprocessed-text` container
-
-You will see AI analysis happen in the Terminal standard out.  The analysis will be saved in a .txt file in the `processed-text` blob container.
-
 ### Using VS Code
 1) Open the root folder in VS Code:
 
@@ -78,21 +69,11 @@ code .
 3) Run and Debug by pressing `F5`
 4) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `unprocessed-text` if it does not already exists
 5) Copy any .txt document file with text into the `unprocessed-text` container
+6) In the Azure extension of VS Code, open Azure:Workspace -> Local Project -> Functions -> `summarize_function`.  Right-click and Execute Function now.  At the command palette prompt, enter the path to the storage blob you just uploaded: `unprocessed-text/<your_text_filename.txt>`.  This will simulate an EventGrid trigger locally and your function will trigger and show output in the terminal.  
 
 You will see AI analysis happen in the Terminal standard out.  The analysis will be saved in a .txt file in the `processed-text` blob container.
 
-### Using Functions Core Tools CLI
-0) Ensure `local.settings.json` exists already using steps above
-1) Open a new terminal and do the following:
-
-```bash
-cd text_summarization
-func start
-```
-2) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `test-samples-trigger` if it does not already exists
-3) Copy any .txt document file with text into the `test-samples-trigger` container
-
-You will see AI analysis happen in the Terminal standard out.  The analysis will be saved in a .txt file in the `test-samples-output` blob container.
+Note, this newer mechanism for BlobTrigger with EventGrid source is documented in more detail here: https://learn.microsoft.com/en-us/azure/azure-functions/functions-event-grid-blob-trigger?pivots=programming-language-python#run-the-function-locally. 
 
 ## Deploy to Azure
 
