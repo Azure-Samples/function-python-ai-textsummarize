@@ -59,15 +59,6 @@ Alternatively you can [create a Language resource](https://portal.azure.com/#cre
 }
 ```
 
-
-### Using Visual Studio
-1) Open `text_summarization.sln` using Visual Studio 2022 or later.
-2) Press Run (`F5`) to run in the debugger
-3) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `unprocessed-text` if it does not already exists
-4) Copy any .txt document file with text into the `unprocessed-text` container
-
-You will see AI analysis happen in the Terminal standard out.  The analysis will be saved in a .txt file in the `processed-text` blob container.
-
 ### Using VS Code
 1) Open the root folder in VS Code:
 
@@ -78,21 +69,11 @@ code .
 3) Run and Debug by pressing `F5`
 4) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `unprocessed-text` if it does not already exists
 5) Copy any .txt document file with text into the `unprocessed-text` container
+6) In the Azure extension of VS Code, open Azure:Workspace -> Local Project -> Functions -> `summarize_function`.  Right-click and Execute Function now.  At the command palette prompt, enter the path to the storage blob you just uploaded: `unprocessed-text/<your_text_filename.txt>`.  This will simulate an EventGrid trigger locally and your function will trigger and show output in the terminal.  
 
 You will see AI analysis happen in the Terminal standard out.  The analysis will be saved in a .txt file in the `processed-text` blob container.
 
-### Using Functions Core Tools CLI
-0) Ensure `local.settings.json` exists already using steps above
-1) Open a new terminal and do the following:
-
-```bash
-cd text_summarization
-func start
-```
-2) Open Storage Explorer, Storage Accounts -> Emulator -> Blob Containers -> and create a container `test-samples-trigger` if it does not already exists
-3) Copy any .txt document file with text into the `test-samples-trigger` container
-
-You will see AI analysis happen in the Terminal standard out.  The analysis will be saved in a .txt file in the `test-samples-output` blob container.
+Note, this newer mechanism for BlobTrigger with EventGrid source is documented in more detail here: https://learn.microsoft.com/en-us/azure/azure-functions/functions-event-grid-blob-trigger?pivots=programming-language-python#run-the-function-locally. 
 
 ## Deploy to Azure
 
@@ -110,31 +91,38 @@ The main operation of the code starts with the `summarize_function` function in 
 
 ```python
 @app.function_name(name="summarize_function")
-@app.blob_trigger(arg_name="myblob", path="unprocessed-text/{name}",
-                  connection="AzureWebJobsStorage", source="EventGrid")
-@app.blob_output(arg_name="outputblob", path="processed-text/{name}-output.txt", connection="AzureWebJobsStorage")
+@app.blob_trigger(
+    arg_name="myblob", path="unprocessed-text/{name}",
+    connection="AzureWebJobsStorage",
+    source="EventGrid"
+    )
+@app.blob_output(
+    arg_name="outputblob", path="processed-text/{name}-output.txt",
+    connection="AzureWebJobsStorage")
 def test_function(myblob: func.InputStream, outputblob: func.Out[str]):
-   logging.info(f"Triggered item: {myblob.name}\n")
+    logging.info(f"Triggered item: {myblob.name}\n")
 
-   document = [myblob.read().decode('utf-8')]
-   summarized_text = ai_summarize_txt(document)
-   logging.info(f"\n *****Summary***** \n{summarized_text}");
-   outputblob.set(summarized_text)
+    document = [myblob.read().decode('utf-8')]
+    summarized_text = ai_summarize_txt(document)
+    logging.info(f"\n *****Summary***** \n{summarized_text}")
+    outputblob.set(summarized_text)
 ```
 
 The `ai_summarize_txt` helper function does the heavy lifting for summary extraction and sentiment analysis using the `TextAnalyticsClient` SDK from the [AI Language Services](https://learn.microsoft.com/en-us/azure/ai-services/language-service/):
 
 ```python
+
+
+# Example method for summarizing text
 def ai_summarize_txt(document):
 
     poller = text_analytics_client.begin_extract_summary(document)
     extract_summary_results = poller.result()
-
     summarized_text = ""
-    document_results = poller.result()
+
     for result in extract_summary_results:
         if result.kind == "ExtractiveSummarization":
-            summarized_text= "Summary extracted: \n{}".format(
+            summarized_text = "Summary extracted: \n{}".format(
                 " ".join([sentence.text for sentence in result.sentences]))
             print(summarized_text)
             logging.info(f"Returning summarized text:  \n{summarized_text}")
@@ -142,16 +130,23 @@ def ai_summarize_txt(document):
             print("...Is an error with code '{}' and message '{}'".format(
                 result.error.code, result.error.message
             ))
-            logging.error(f"Error with code '{result.error.code}' and message '{result.error.message}'")
+            logging.error(
+                f"Error with code '{result.error.code}' and message " +
+                "'{result.error.message}'"
+            )
 
     # Perform sentiment analysis on document summary
-    sentiment_result = text_analytics_client.analyze_sentiment([summarized_text])[0]
+    sentiment_result = text_analytics_client.analyze_sentiment(
+        [summarized_text]
+        )[0]
     print(f"\nSentiment: {sentiment_result.sentiment}")
     print(f"Positive Score: {sentiment_result.confidence_scores.positive}")
     print(f"Negative Score: {sentiment_result.confidence_scores.negative}")
     print(f"Neutral Score: {sentiment_result.confidence_scores.neutral}")
 
-    summary_with_sentiment = summarized_text + f"\nSentiment: {sentiment_result.sentiment}\n"
+    summary_with_sentiment = (
+        summarized_text + "\nSentiment: " + f"{sentiment_result.sentiment}\n"
+    )
 
     return summary_with_sentiment
 ```
